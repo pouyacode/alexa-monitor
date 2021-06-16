@@ -54,4 +54,3 @@
 
 
 #_(create-db)
-#_(insert! db :rank testdata)

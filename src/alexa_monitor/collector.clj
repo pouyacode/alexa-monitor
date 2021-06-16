@@ -76,21 +76,6 @@
    :backlink bl})
 
 
-#_(-> "http://localhost:8080"
-    web-grab
-    hiccupize
-    sitename)
-#_(-> "http://localhost:8080"
-    web-grab
-    hiccupize
-    rank
-    digitize)
-#_(-> "http://localhost:8080"
-    web-grab
-    hiccupize
-    backlink
-    digitize)
-
 
 (defn main
   "Entry point."
