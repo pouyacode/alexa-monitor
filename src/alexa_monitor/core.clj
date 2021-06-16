@@ -31,23 +31,27 @@
     (println row)))
 
 
-(defn output
+(defn last-rank
   "Execute query and return lazy sequence."
-  []
-  (query db ["SELECT * FROM rank"]))
+  [site]
+  (-> db
+      (query [(str "SELECT rank FROM rank where site='" site "' order by id desc limit 1")])
+      first
+      :rank))
 
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (insert! db
-           :rank
-           #_(-> "https://www.alexa.com/minisiteinfo/pouyacode.net"
-               collector/main)
-           (-> "http://localhost:8080"
-               collector/main)))
+  (let [info (-> "http://localhost:8080"
+                 collector/main)
+        last-db (last-rank (:site info))
+        changed? (not= last-db (:rank info))]
+    (if changed?
+      (insert! db
+               :rank
+               info))))
 
 
 #_(create-db)
 #_(insert! db :rank testdata)
-#_(print-result-set (output))
