@@ -15,9 +15,10 @@
   []
   (try (db-do-commands db
                        (create-table-ddl :rank
-                                         [[:site :text]
-                                          [:rank :int]
-                                          [:backlink :int]
+                                         [[:id :integer :primary :key :asc]
+                                          [:site :text]
+                                          [:rank :integer]
+                                          [:backlink :integer]
                                           [:timestamp :datetime :default :current_timestamp]]))
        (catch Exception e
          (println (.getMessage e)))))
