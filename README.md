@@ -1,36 +1,45 @@
 # alexa-monitor
 
-FIXME: description
+Simple web crawler to collect [alexa](alexa.com) rank of a website and store in database.
 
 ## Installation
 
-Download from http://example.com/FIXME.
+Install dependencies:
+```
+lein deps
+```
 
 ## Usage
 
-FIXME: explanation
+Run:
+```
+lein run
+```
 
-    $ java -jar alexa-monitor-0.1.0-standalone.jar [args]
+
+```
+lein uberjar
+```
+
+And run the Jar file:
+```
+java -jar target/uberjar/alexa-monitor-0.1.0-SNAPSHOT-standalone.jar
+```
+
+Create GraalVM native-image:
+```
+lein native-image
+```
+
 
 ## Options
 
-FIXME: listing of options this app accepts.
+No option yet.
 
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
 
 ## License
 
-Copyright © 2021 FIXME
+Copyright © 2021 Pouya Abbassi
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
