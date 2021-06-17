@@ -7,7 +7,7 @@
 (def db
   {:classname "org.sqlite.JDBC"
    :subprotocol "sqlite"
-   :subname "db/database.db"})
+   :subname (.getAbsolutePath (new java.io.File "db/database.db"))})
 
 
 (defn create-db

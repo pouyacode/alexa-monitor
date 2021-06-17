@@ -70,11 +70,11 @@
       :content
       first))
 
+
 (defn hash-mapize [[site rank bl]]
   {:site site
    :rank rank
    :backlink bl})
-
 
 
 (defn main
