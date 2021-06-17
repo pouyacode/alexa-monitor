@@ -2,6 +2,7 @@
 
 Simple web crawler to collect [alexa](alexa.com) rank of a website and store in database.
 
+
 ## Installation
 
 Install dependencies:
@@ -9,13 +10,13 @@ Install dependencies:
 lein deps
 ```
 
+
 ## Usage
 
 Run:
 ```
 lein run
 ```
-
 
 ```
 lein uberjar
@@ -31,10 +32,17 @@ Create GraalVM native-image:
 lein native-image
 ```
 
+### Local Sample data
+There's a sample html file in `resources` directory, all links are changed to point at `localhost` so it's basically an ugly copy of Alexa`s Mini Siteinfo. You can run a simple webserver on port 8080 to serve this file, and use that for test (instead of submitting actual requests to alexa.com)
+```
+cd resources
+python3 -m http.server 8080
+```
+
 
 ## Options
 
-No option yet.
+No options yet.
 
 
 ## License
@@ -51,3 +59,6 @@ Public License, v. 2.0 are satisfied: GNU General Public License as published by
 the Free Software Foundation, either version 2 of the License, or (at your
 option) any later version, with the GNU Classpath Exception which is available
 at https://www.gnu.org/software/classpath/license.html.
+
+---
+[Code of Conduct](https://github.com/pouyacode/alexa-monitor/blob/master/CODE_OF_CONDUCT.md)
