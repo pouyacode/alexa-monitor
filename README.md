@@ -1,3 +1,7 @@
+<a href="https://gitter.im/pouyacode/alexa-monitor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"><img src="https://badges.gitter.im/pouyacode/alexa-monitor.svg" /></a>
+[Code of Conduct](https://github.com/pouyacode/alexa-monitor/blob/master/CODE_OF_CONDUCT.md)
+
+---
 # alexa-monitor
 
 Simple web crawler to collect [alexa](alexa.com) rank of a website and store in database.
@@ -59,6 +63,3 @@ Public License, v. 2.0 are satisfied: GNU General Public License as published by
 the Free Software Foundation, either version 2 of the License, or (at your
 option) any later version, with the GNU Classpath Exception which is available
 at https://www.gnu.org/software/classpath/license.html.
-
----
-[Code of Conduct](https://github.com/pouyacode/alexa-monitor/blob/master/CODE_OF_CONDUCT.md)
