@@ -1,43 +1,7 @@
 (ns alexa-monitor.core
   (:require [alexa-monitor.collector :as collector]
-            [clojure.java.jdbc :refer :all])
+            [alexa-monitor.database :as database])
   (:gen-class))
-
-
-(def db
-  {:classname "org.sqlite.JDBC"
-   :subprotocol "sqlite"
-   :subname (.getAbsolutePath (new java.io.File "db/database.db"))})
-
-
-(defn create-db
-  "Create database and table."
-  []
-  (try (db-do-commands db
-                       (create-table-ddl :rank
-                                         [[:id :integer :primary :key :asc]
-                                          [:site :text]
-                                          [:rank :integer]
-                                          [:backlink :integer]
-                                          [:timestamp :datetime :default :current_timestamp]]))
-       (catch Exception e
-         (println (.getMessage e)))))
-
-
-(defn print-result-set
-  "Print the result set in tabular form."
-  [result-set]
-  (doseq [row result-set]
-    (println row)))
-
-
-(defn last-rank
-  "Execute query and return lazy sequence."
-  [site]
-  (-> db
-      (query [(str "SELECT rank FROM rank where site='" site "' order by id desc limit 1")])
-      first
-      :rank))
 
 
 (defn -main
@@ -45,12 +9,9 @@
   [& args]
   (let [info (-> "http://localhost:8080"
                  collector/main)
-        last-db (last-rank (:site info))
+        last-db (database/last-rank (:site info))
         changed? (not= last-db (:rank info))]
     (if changed?
-      (insert! db
-               :rank
-               info))))
-
-
-#_(create-db)
+      (database/new-entry database/db
+                          :rank
+                          info))))
