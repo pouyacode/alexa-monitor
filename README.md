@@ -1,5 +1,6 @@
 <a href="https://gitter.im/pouyacode/alexa-monitor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"><img src="https://badges.gitter.im/pouyacode/alexa-monitor.svg" /></a>
 [Code of Conduct](https://github.com/pouyacode/alexa-monitor/blob/master/CODE_OF_CONDUCT.md)
+[Documents](https://alexa-monitor.pouyacode.net)
 
 ---
 # alexa-monitor
@@ -35,6 +36,12 @@ Create GraalVM native-image:
 ```
 lein native-image
 ```
+
+Generate docs (follow instructions from [Marginalia](https://github.com/gdeer81/lein-marginalia)):
+```
+lein marg -f index.html
+```
+
 
 ### Local Sample data
 There's a sample html file in `resources` directory, all links are changed to point at `localhost` so it's basically an ugly copy of Alexa`s Mini Siteinfo. You can run a simple webserver on port 8080 to serve this file, and use that for test (instead of submitting actual requests to alexa.com)
