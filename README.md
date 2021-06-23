@@ -1,6 +1,4 @@
-<a href="https://gitter.im/pouyacode/alexa-monitor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"><img src="https://badges.gitter.im/pouyacode/alexa-monitor.svg" /></a>
-[Code of Conduct](https://github.com/pouyacode/alexa-monitor/blob/master/CODE_OF_CONDUCT.md)
-[Documents](https://alexa-monitor.pouyacode.net)
+[![Gitter Chat](https://badges.gitter.im/pouyacode/alexa-monitor.svg)](https://gitter.im/pouyacode/alexa-monitor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) - [Documents](https://alexa-monitor.pouyacode.net) - [Code of Conduct](https://github.com/pouyacode/alexa-monitor/blob/master/CODE_OF_CONDUCT.md)
 
 ---
 # alexa-monitor
