@@ -44,7 +44,7 @@
 (defn new-entry
   "Wrapper around jdbc/insert!"
   [db table data]
-  (db table data))
+  (insert! db table data))
 
 
 #_(create-db)
