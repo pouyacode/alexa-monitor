@@ -1,9 +1,12 @@
-;;; Here we handle everything relative to crawling the webpage and extracting the parts we need.
-;;; Let's choose cool function names; If it's about getting some html page, why not call it `web-grab`?!
+;;; Here we handle everything relative to crawling the webpage and extracting
+;;; the parts we need. Let's choose cool function names; If it's about getting
+;;; some html page, why not call it `web-grab`?!
 ;;;
-;;; Here we need 3 different things from the webpage, so we have one function for each!
-;;; They look a lot alike, but I decided not to mix them into one function, so the result would be easier to read and maintain.
-;;; Maybe later we can find a way to remove duplication without making it look messy.
+;;; Here we need 3 different things from the webpage, so we have one function
+;;; for each! They look a lot alike, but I decided not to mix them into one
+;;; function, so the result would be easier to read and maintain.
+;;; Maybe later we can find a way to remove duplication without making it look
+;;; messy.
 (ns alexa-monitor.collector
   (:require [hato.client :as web]
             [hickory.core :as hick]
@@ -25,7 +28,8 @@
    0))
 
 
-;;; Creates a simple HTTP GET request, ignores the status and only returns the HTML part.
+;;; Creates a simple HTTP GET request, ignores the status and only returns the
+;;; HTML part.
 ;;;
 ;;; TODO: Error handling.
 (defn web-grab
@@ -73,8 +77,8 @@
       digitize))
 
 
-;;; I think it's easier to read sitename from webpage, than use some faulty regex to remove `http` and `www` and `/something` part
-;;; out of user's input.
+;;; I think it's easier to read sitename from webpage, than use some faulty
+;;; regex to remove `http` and `www` and `/something` part out of user's input.
 (defn sitename
   "Get sitename from webpage, without `http` and other parts."
   [hiccup]
