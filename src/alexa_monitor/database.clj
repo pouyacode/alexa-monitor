@@ -28,27 +28,42 @@
         db
         (create-table-ddl :rank
                           [[:id :integer :primary :key :asc]
-                           [:site :text]
+                           [:domain_id :integer]
                            [:rank :integer]
                            [:backlink :integer]
-                           [:timestamp :datetime :default :current_timestamp]]))
+                           [:timestamp :datetime :default :current_timestamp]
+                           [:foreign :key "(domain_id)" :references :domains "(domain_id)"]]))
        (catch Exception e
-         (println (.getMessage e)))))
+         (println (.getMessage e))))
+  (try (db-do-commands
+        db
+        (create-table-ddl :domains
+                          [[:domain_id :integer :primary :key :asc]
+                           [:domain :text]]))
+       (catch Exception e
+         (.getMessage e))))
+
+
+(defn domain-list
+  "Get list of tracked websites from `domains` table."
+  []
+  (-> db
+      (query ["SELECT * from domains"])))
 
 
 (defn last-rank
   "Get the last recorded rank for given domain name. It returns a lazy sequence."
-  [site]
+  [domain-id]
   (-> db
-      (query [(str "SELECT rank FROM rank where site='" site "' order by id desc limit 1")])
+      (query [(str "SELECT rank FROM rank where domain_id='" domain-id "' order by id desc limit 1")])
       first
       :rank))
 
 
 (defn new-entry
   "Wrapper around jdbc/insert!"
-  [db table data]
-  (insert! db table data))
-
-
-#_(create-db)
+  [domain-map]
+  (let [domain (:domain_id domain-map)
+        last-record (last-rank domain)]
+    (if (not= last-record (:rank domain-map))
+      (insert! db "rank" domain-map))))

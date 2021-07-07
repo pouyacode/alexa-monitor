@@ -35,7 +35,7 @@
 (defn web-grab
   "Retrieve the page and returns html output."
   [url]
-  (-> (web/get url)
+  (-> (web/get (str "http://localhost:8000/" url "/"))
       :body))
 
 
@@ -51,7 +51,7 @@
 ;;; Extract the rank of our domain from the webpage and `gigitize` it.
 (defn rank
   "Proces the hiccup and read `Alexa Rank`"
-  [hiccup]
+  [domain-map hiccup]
   (-> (s/select (s/child (s/class "nopaddingbottom")
                          (s/tag :div)
                          (s/tag :a))
@@ -59,13 +59,14 @@
       first
       :content
       second
-      digitize))
+      digitize
+      (#(conj domain-map [:rank %]))))
 
 
 ;;; Extract the backlink count, then `digitize` it.
 (defn backlink
   "Process the hiccup and read `Sites Linking In`."
-  [hiccup]
+  [domain-map hiccup]
   (-> (s/select (s/child (s/class "nopaddingbottom")
                          (s/tag :div)
                          (s/class "nomargin")
@@ -74,19 +75,8 @@
       first
       :content
       first
-      digitize))
-
-
-;;; I think it's easier to read sitename from webpage, than use some faulty
-;;; regex to remove `http` and `www` and `/something` part out of user's input.
-(defn sitename
-  "Get sitename from webpage, without `http` and other parts."
-  [hiccup]
-  (-> (s/select (s/child (s/class "truncation"))
-                hiccup)
-      first
-      :content
-      first))
+      digitize
+      (#(conj domain-map [:backlink %]))))
 
 
 ;;; Later we'll insert this hash-map directly into database.
@@ -102,13 +92,11 @@
 ;;; Creates a nice data-flow through every function of this namespace.
 (defn main
   "Entry point."
-  [url]
-  (hash-mapize
-   ((juxt sitename rank backlink)
-    (-> url
-        web-grab
-        hiccupize))))
-
-
-#_(main "http://localhost:8080")
-#_(main "https://www.alexa.com/minisiteinfo/pouyacode.net")
+  [domain-map]
+  (let [hiccup (-> :domain
+                   domain-map
+                   web-grab
+                   hiccupize)]
+    (-> domain-map
+        (rank hiccup)
+        (backlink hiccup))))

@@ -24,15 +24,9 @@
   [& args]
   ;; Change this to `https://www.alexa.com/minisiteinfo/domain.com` to create
   ;; actual requests.
-  (let [info (-> "https://www.alexa.com/minisiteinfo/pouyacode.net"
-                 collector/main)
-        ;; Use the "site name" inside the crawled page, to get latest data from
-        ;; local database.
-        last-db (database/last-rank (:site info))
-        ;; Check if newly crawled data is the same as local database's latest
-        ;; record.
-        changed? (not= last-db (:rank info))]
-    (if changed?
-      (database/new-entry database/db   ;Submit new rank to local database.
-                          :rank
-                          info))))
+  (let [domains (database/domain-list)]
+    (map #(-> %
+               collector/main
+               (dissoc :domain)
+               database/new-entry)
+         domains)))
