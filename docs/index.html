@@ -2875,33 +2875,21 @@ within them.</p>
   (:gen-class))</pre></td></tr><tr><td class="docs"><p>Crawl the page and grab some useful data via <code>alexa-monitor.collector</code> and
   put those data in database, using <code>alexa-monitor.database</code>.</p>
 
-<p>You can run a simple webserver using <code>python3 -m http.server 8888</code> inside
-<code>resources</code> directory. So that our tests and development won't create actual
-requests to Alexa's servers. For creating <code>uberjar</code> or testing the actual
-result, change the <code>http://localhost:8080</code> to
-<code>https://www.alexa.com/minisiteinfo/domain.com</code>. For now, it works with a
-single hard-coded url.</p>
+<p>This function calls <code>database/domain-list</code> and gets a list of current domains
+to watch. Each domain is inside a hash-map. Something like
+<code>{:domain_id 1, :domain "pouyacode.net"}</code> and sends it to <code>collector/main</code>
+to add more information to that hash-map.</p>
 
-<p>This functions sends our url to <code>collector/main</code> and gets our last database
-record from <code>database/last-rank</code>.
-If our last record and the crawled data were not equal, it creates a new
-entry in database.</p>
+<p>Then we <code>(dissoc :domain)</code> from it to make it ready for our <code>rank</code> table.
+and send the result to <code>database/new-entry</code> to be inserted into database.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn -main
   [&amp; args]
-  ;; Change this to `https://www.alexa.com/minisiteinfo/domain.com` to create
-  ;; actual requests.
-  (let [info (-&gt; &quot;https://www.alexa.com/minisiteinfo/pouyacode.net&quot;
-                 collector/main)
-        ;; Use the &quot;site name&quot; inside the crawled page, to get latest data from
-        ;; local database.
-        last-db (database/last-rank (:site info))
-        ;; Check if newly crawled data is the same as local database's latest
-        ;; record.
-        changed? (not= last-db (:rank info))]
-    (if changed?
-      (database/new-entry database/db   ;Submit new rank to local database.
-                          :rank
-                          info))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.collector" name="alexa-monitor.collector"><h1 class="project-name">alexa-monitor.collector</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Here we handle everything relative to crawling the webpage and extracting
+  (let [domains (database/domain-list)]
+    (map #(-&gt; %
+               collector/main
+               (dissoc :domain)
+               database/new-entry)
+         domains)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.collector" name="alexa-monitor.collector"><h1 class="project-name">alexa-monitor.collector</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Here we handle everything relative to crawling the webpage and extracting
 the parts we need. Let's choose cool function names; If it's about getting
 some html page, why not call it <code>web-grab</code>?!</p>
 
@@ -2931,10 +2919,18 @@ Because java's <code>Long</code> can be <code>nil</code> sometimes!</p>
 <p>Creates a simple HTTP GET request, ignores the status and only returns the
 HTML part.</p>
 
+<p>The url is hard-coded here. You need to run a simple webserver to serve
+contents of <code>resources</code> directory on port 8000.
+I use <code>python3 -m http.server 8000</code> for development.</p>
+
+<p>You need to change this url to <code>https://www.alexa.com/minisiteinfo/</code>
+If you want to create actual requests to alexa.</p>
+
 <p>TODO: Error handling.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn web-grab
   [url]
-  (-&gt; (web/get url)
+  (-&gt; (web/get (str &quot;http://localhost:8000/&quot; url &quot;/&quot;))
+      #_(web/get (str &quot;https://www.alexa.com/minisiteinfo/&quot; url))
       :body))</pre></td></tr><tr><td class="docs"><p>Generate hiccup from html input.</p>
 
 <p>Let's have 'hickory' handle everything.</p>
@@ -2944,9 +2940,10 @@ HTML part.</p>
       hick/parse
       hick/as-hickory))</pre></td></tr><tr><td class="docs"><p>Proces the hiccup and read <code>Alexa Rank</code></p>
 
-<p>Extract the rank of our domain from the webpage and <code>gigitize</code> it.</p>
+<p>Extract the rank of our domain from the webpage and <code>gigitize</code> it.
+Then add it to <code>domain-map</code> hash-map and return the result.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn rank
-  [hiccup]
+  [domain-map hiccup]
   (-&gt; (s/select (s/child (s/class &quot;nopaddingbottom&quot;)
                          (s/tag :div)
                          (s/tag :a))
@@ -2954,11 +2951,13 @@ HTML part.</p>
       first
       :content
       second
-      digitize))</pre></td></tr><tr><td class="docs"><p>Process the hiccup and read <code>Sites Linking In</code>.</p>
+      digitize
+      (#(conj domain-map [:rank %]))))</pre></td></tr><tr><td class="docs"><p>Process the hiccup and read <code>Sites Linking In</code>.</p>
 
-<p>Extract the backlink count, then <code>digitize</code> it.</p>
+<p>Extract the backlink count, then <code>digitize</code> it.
+Then add it to <code>domain-map</code> hash-map and return the result.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn backlink
-  [hiccup]
+  [domain-map hiccup]
   (-&gt; (s/select (s/child (s/class &quot;nopaddingbottom&quot;)
                          (s/tag :div)
                          (s/class &quot;nomargin&quot;)
@@ -2967,34 +2966,21 @@ HTML part.</p>
       first
       :content
       first
-      digitize))</pre></td></tr><tr><td class="docs"><p>Get sitename from webpage, without <code>http</code> and other parts.</p>
+      digitize
+      (#(conj domain-map [:backlink %]))))</pre></td></tr><tr><td class="docs"><p>Entry point.</p>
 
-<p>I think it's easier to read sitename from webpage, than use some faulty
-regex to remove <code>http</code> and <code>www</code> and <code>/something</code> part out of user's input.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn sitename
-  [hiccup]
-  (-&gt; (s/select (s/child (s/class &quot;truncation&quot;))
-                hiccup)
-      first
-      :content
-      first))</pre></td></tr><tr><td class="docs"><p>Take everything and put them into a single hash-map.</p>
-
-<p>Later we'll insert this hash-map directly into database.
-It's exactly how <code>database/new-entry</code> wants it!</p>
-</td><td class="codes"><pre class="brush: clojure">(defn hash-mapize
-  [[site rank bl]]
-  {:site site
-   :rank rank
-   :backlink bl})</pre></td></tr><tr><td class="docs"><p>Entry point.</p>
-
-<p>Creates a nice data-flow through every function of this namespace.</p>
+<p>Creates a nice data-flow through every function of this namespace.
+First request the url and create a hicuup its HTML elements, Then extract
+<code>rank</code> and <code>backlink</code> from it.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn main
-  [url]
-  (hash-mapize
-   ((juxt sitename rank backlink)
-    (-&gt; url
-        web-grab
-        hiccupize))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.database" name="alexa-monitor.database"><h1 class="project-name">alexa-monitor.database</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Small namespace with few useful functions to work with database.</p>
+  [domain-map]
+  (let [hiccup (-&gt; :domain
+                   domain-map
+                   web-grab
+                   hiccupize)]
+    (-&gt; domain-map
+        (rank hiccup)
+        (backlink hiccup))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.database" name="alexa-monitor.database"><h1 class="project-name">alexa-monitor.database</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Small namespace with few useful functions to work with database.</p>
 </td><td class="codes"><pre class="brush: clojure">(ns alexa-monitor.database
   (:require [clojure.java.jdbc :refer :all])
   (:gen-class))</pre></td></tr><tr><td class="docs"><p>We currently use sqlite. Since it's a small project, even a CSV file could
@@ -3019,21 +3005,39 @@ database automatically if the software couldn't find database.</p>
         db
         (create-table-ddl :rank
                           [[:id :integer :primary :key :asc]
-                           [:site :text]
+                           [:domain_id :integer]
                            [:rank :integer]
                            [:backlink :integer]
-                           [:timestamp :datetime :default :current_timestamp]]))
+                           [:timestamp :datetime :default :current_timestamp]
+                           [:foreign :key &quot;(domain_id)&quot; :references :domains &quot;(domain_id)&quot;]]))
        (catch Exception e
-         (println (.getMessage e)))))</pre></td></tr><tr><td class="docs"><p>Get the last recorded rank for given domain name. It returns a lazy sequence.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn last-rank
-  [site]
+         (println (.getMessage e))))
+  (try (db-do-commands
+        db
+        (create-table-ddl :domains
+                          [[:domain_id :integer :primary :key :asc]
+                           [:domain :text]]))
+       (catch Exception e
+         (.getMessage e))))</pre></td></tr><tr><td class="docs"><p>Get list of tracked websites from <code>domains</code> table.
+  The result would be like:
+  <code>({:domain_id 1, :domain "domain.com"} {:domain_id 2 :domain "domain.net")</code></p>
+</td><td class="codes"><pre class="brush: clojure">(defn domain-list
+  []
   (-&gt; db
-      (query [(str &quot;SELECT rank FROM rank where site='&quot; site &quot;' order by id desc limit 1&quot;)])
+      (query [&quot;SELECT * from domains&quot;])))</pre></td></tr><tr><td class="docs"><p>Get the last recorded rank for given domain name. It returns a lazy sequence.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn last-rank
+  [domain-id]
+  (-&gt; db
+      (query [(str &quot;SELECT rank FROM rank where domain_id='&quot; domain-id &quot;' order by id desc limit 1&quot;)])
       first
-      :rank))</pre></td></tr><tr><td class="docs"><p>Wrapper around jdbc/insert!</p>
+      :rank))</pre></td></tr><tr><td class="docs"><p>Check if current rank is <code>not=</code> the last recorded rank.
+  Then insert new data <code>rank</code> table.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn new-entry
-  [db table data]
-  (insert! db table data))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_alexa-monitor.core">alexa-monitor.core</li><li class="floating-toc-li" id="floating-toc_alexa-monitor.collector">alexa-monitor.collector</li><li class="floating-toc-li" id="floating-toc_alexa-monitor.database">alexa-monitor.database</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+  [domain-map]
+  (let [domain (:domain_id domain-map)
+        last-record (last-rank domain)]
+    (if (not= last-record (:rank domain-map))
+      (insert! db &quot;rank&quot; domain-map))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_alexa-monitor.core">alexa-monitor.core</li><li class="floating-toc-li" id="floating-toc_alexa-monitor.collector">alexa-monitor.collector</li><li class="floating-toc-li" id="floating-toc_alexa-monitor.database">alexa-monitor.database</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
 SyntaxHighlighter.all();
 
 // hackity hack
