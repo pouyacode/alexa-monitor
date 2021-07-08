@@ -31,11 +31,19 @@
 ;;; Creates a simple HTTP GET request, ignores the status and only returns the
 ;;; HTML part.
 ;;;
+;;; The url is hard-coded here. You need to run a simple webserver to serve
+;;; contents of `resources` directory on port 8000.
+;;; I use `python3 -m http.server 8000` for development.
+;;;
+;;; You need to change this url to `https://www.alexa.com/minisiteinfo/`
+;;; If you want to create actual requests to alexa.
+;;;
 ;;; TODO: Error handling.
 (defn web-grab
   "Retrieve the page and returns html output."
   [url]
   (-> (web/get (str "http://localhost:8000/" url "/"))
+      #_(web/get (str "https://www.alexa.com/minisiteinfo/" url))
       :body))
 
 
@@ -49,6 +57,7 @@
 
 
 ;;; Extract the rank of our domain from the webpage and `gigitize` it.
+;;; Then add it to `domain-map` hash-map and return the result.
 (defn rank
   "Proces the hiccup and read `Alexa Rank`"
   [domain-map hiccup]
@@ -64,6 +73,7 @@
 
 
 ;;; Extract the backlink count, then `digitize` it.
+;;; Then add it to `domain-map` hash-map and return the result.
 (defn backlink
   "Process the hiccup and read `Sites Linking In`."
   [domain-map hiccup]
@@ -79,17 +89,9 @@
       (#(conj domain-map [:backlink %]))))
 
 
-;;; Later we'll insert this hash-map directly into database.
-;;; It's exactly how `database/new-entry` wants it!
-(defn hash-mapize
-  "Take everything and put them into a single hash-map."
-  [[site rank bl]]
-  {:site site
-   :rank rank
-   :backlink bl})
-
-
 ;;; Creates a nice data-flow through every function of this namespace.
+;;; First request the url and create a hicuup its HTML elements, Then extract
+;;; `rank` and `backlink` from it.
 (defn main
   "Entry point."
   [domain-map]

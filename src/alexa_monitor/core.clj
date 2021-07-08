@@ -7,23 +7,17 @@
   (:gen-class))
 
 
-;;; You can run a simple webserver using `python3 -m http.server 8888` inside
-;;; `resources` directory. So that our tests and development won't create actual
-;;; requests to Alexa's servers. For creating `uberjar` or testing the actual
-;;; result, change the `http://localhost:8080` to
-;;; `https://www.alexa.com/minisiteinfo/domain.com`. For now, it works with a
-;;; single hard-coded url.
+;;; This function calls `database/domain-list` and gets a list of current domains
+;;; to watch. Each domain is inside a hash-map. Something like
+;;; `{:domain_id 1, :domain "pouyacode.net"}` and sends it to `collector/main`
+;;; to add more information to that hash-map.
 ;;;
-;;; This functions sends our url to `collector/main` and gets our last database
-;;; record from `database/last-rank`.
-;;; If our last record and the crawled data were not equal, it creates a new
-;;; entry in database.
+;;; Then we `(dissoc :domain)` from it to make it ready for our `rank` table.
+;;; and send the result to `database/new-entry` to be inserted into database.
 (defn -main
   "Crawl the page and grab some useful data via `alexa-monitor.collector` and
   put those data in database, using `alexa-monitor.database`."
   [& args]
-  ;; Change this to `https://www.alexa.com/minisiteinfo/domain.com` to create
-  ;; actual requests.
   (let [domains (database/domain-list)]
     (map #(-> %
                collector/main

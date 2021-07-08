@@ -45,7 +45,9 @@
 
 
 (defn domain-list
-  "Get list of tracked websites from `domains` table."
+  "Get list of tracked websites from `domains` table.
+  The result would be like:
+  `({:domain_id 1, :domain \"domain.com\"} {:domain_id 2 :domain \"domain.net\")`"
   []
   (-> db
       (query ["SELECT * from domains"])))
@@ -61,7 +63,8 @@
 
 
 (defn new-entry
-  "Wrapper around jdbc/insert!"
+  "Check if current rank is `not=` the last recorded rank.
+  Then insert new data `rank` table."
   [domain-map]
   (let [domain (:domain_id domain-map)
         last-record (last-rank domain)]
