@@ -45,6 +45,8 @@ lein marg -f index.html
 There's a sample html file in `resources` directory, all links are changed to point at `localhost` so it's basically an ugly copy of Alexa`s Mini Siteinfo. You can run a simple webserver on port 8080 to serve this file, and use that for test (instead of submitting actual requests to alexa.com)
 ```
 cd resources
+./run_server.py
+#or
 python3 -m http.server 8080
 ```
 
