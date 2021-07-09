@@ -20,7 +20,7 @@
 (defn digitize
   "Trim string and return its digit part."
   [string]
-  (or 
+  (or
    (->> string
         (re-seq #"[\d.]+")
         clojure.string/join
