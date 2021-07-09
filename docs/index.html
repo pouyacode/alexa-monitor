@@ -2885,11 +2885,11 @@ and send the result to <code>database/new-entry</code> to be inserted into datab
 </td><td class="codes"><pre class="brush: clojure">(defn -main
   [&amp; args]
   (let [domains (database/domain-list)]
-    (map #(-&gt; %
-               collector/main
-               (dissoc :domain)
-               database/new-entry)
-         domains)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.collector" name="alexa-monitor.collector"><h1 class="project-name">alexa-monitor.collector</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Here we handle everything relative to crawling the webpage and extracting
+    (doall (map #(-&gt; %
+                     collector/main
+                     (dissoc :domain)
+                     database/new-entry)
+                domains))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.collector" name="alexa-monitor.collector"><h1 class="project-name">alexa-monitor.collector</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Here we handle everything relative to crawling the webpage and extracting
 the parts we need. Let's choose cool function names; If it's about getting
 some html page, why not call it <code>web-grab</code>?!</p>
 
@@ -2909,7 +2909,7 @@ I used an <code>or</code> to return <code>0</code> if there wasn't any digit in 
 Because java's <code>Long</code> can be <code>nil</code> sometimes!</p>
 </td><td class="codes"><pre class="brush: clojure">(defn digitize
   [string]
-  (or 
+  (or
    (-&gt;&gt; string
         (re-seq #&quot;[\d.]+&quot;)
         clojure.string/join
