@@ -19,8 +19,8 @@
   put those data in database, using `alexa-monitor.database`."
   [& args]
   (let [domains (database/domain-list)]
-    (map #(-> %
-               collector/main
-               (dissoc :domain)
-               database/new-entry)
-         domains)))
+    (doall (map #(-> %
+                     collector/main
+                     (dissoc :domain)
+                     database/new-entry)
+                domains))))
