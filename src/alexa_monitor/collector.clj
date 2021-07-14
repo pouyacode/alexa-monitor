@@ -20,12 +20,14 @@
 (defn digitize
   "Trim string and return its digit part."
   [string]
-  (or
-   (->> string
-        (re-seq #"[\d.]+")
-        clojure.string/join
-        clojure.edn/read-string)
-   0))
+  (try
+    (or
+     (->> string
+          (re-seq #"[\d.]+")
+          clojure.string/join
+          clojure.edn/read-string)
+     0)
+    (catch Exception e nil)))
 
 
 ;;; Creates a simple HTTP GET request, ignores the status and only returns the
@@ -42,9 +44,10 @@
 (defn web-grab
   "Retrieve the page and returns html output."
   [url]
-  (-> (web/get (str "http://localhost:8000/" url "/"))
-      #_(web/get (str "https://www.alexa.com/minisiteinfo/" url))
-      :body))
+  (try (:body
+        #_(web/get (str "http://localhost:8000/" url "/"))
+        (web/get (str "https://www.alexa.com/minisiteinfo/" url)))
+       (catch Exception e "")))
 
 
 ;;; Let's have 'hickory' handle everything.

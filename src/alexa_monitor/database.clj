@@ -66,7 +66,9 @@
   "Check if current rank is `not=` the last recorded rank.
   Then insert new data `rank` table."
   [domain-map]
-  (let [domain (:domain_id domain-map)
-        last-record (last-rank domain)]
-    (if (not= last-record (:rank domain-map))
-      (insert! db "rank" domain-map))))
+  (if-not (nil? (:rank domain-map))
+    (let [domain (:domain_id domain-map)
+          last-record (last-rank domain)]
+      (if (not= last-record (:rank domain-map))
+        (insert! db "rank" domain-map)))
+    (println "Connection error:" domain-map)))
