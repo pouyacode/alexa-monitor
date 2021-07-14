@@ -70,5 +70,8 @@
     (let [domain (:domain_id domain-map)
           last-record (last-rank domain)]
       (if (not= last-record (:rank domain-map))
-        (insert! db "rank" domain-map)))
+        (do
+          (insert! db "rank" domain-map)
+          (println "New rank:" domain-map))
+        (println "No change:" domain-map)))
     (println "Connection error:" domain-map)))

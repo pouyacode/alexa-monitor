@@ -44,6 +44,7 @@
 (defn web-grab
   "Retrieve the page and returns html output."
   [url]
+  (println "Getting updates for:" url)
   (try (:body
         #_(web/get (str "http://localhost:8000/" url "/"))
         (web/get (str "https://www.alexa.com/minisiteinfo/" url)))
