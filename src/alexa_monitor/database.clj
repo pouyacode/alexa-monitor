@@ -34,14 +34,14 @@
                            [:timestamp :datetime :default :current_timestamp]
                            [:foreign :key "(domain_id)" :references :domains "(domain_id)"]]))
        (catch Exception e
-         (println (.getMessage e))))
+         (.println *err* (.getMessage e))))
   (try (db-do-commands
         db
         (create-table-ddl :domains
                           [[:domain_id :integer :primary :key :asc]
                            [:domain :text]]))
        (catch Exception e
-         (.getMessage e))))
+         (.println *err* (.getMessage e)))))
 
 
 (defn domain-list
@@ -74,4 +74,4 @@
           (insert! db "rank" domain-map)
           (println "New rank:" domain-map))
         (println "No change:" domain-map)))
-    (println "Connection error:" domain-map)))
+    (.println *err* "Connection error:" domain-map)))
