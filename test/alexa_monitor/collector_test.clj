@@ -42,13 +42,13 @@
 
 (deftest test-parse
   (testing "Rank test."
-    (is (= 9397083 (-> html
-                       hiccupize
-                       rank))))
+    (is (= {:rank 9397083} (-> html
+                               hiccupize
+                               (#(rank {} %))))))
   (testing "Backlink test."
-    (is (= 1 (-> html
-                 hiccupize
-                 backlink)))))
+    (is (= {:backlink 1} (-> html
+                             hiccupize
+                             (#(backlink {} %)))))))
 
 
 (deftest test-digitize
