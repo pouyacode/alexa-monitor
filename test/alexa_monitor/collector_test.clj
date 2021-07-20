@@ -43,16 +43,12 @@
 (deftest test-parse
   (testing "Rank test."
     (is (= 9397083 (-> html
-                            hiccupize
-                            rank))))
+                       hiccupize
+                       rank))))
   (testing "Backlink test."
-      (is (= 1 (-> html
-                   hiccupize
-                   backlink))))
-  (testing "Sitename test."
-      (is (= "pouyacode.net" (-> html
-                                 hiccupize
-                                 sitename)))))
+    (is (= 1 (-> html
+                 hiccupize
+                 backlink)))))
 
 
 (deftest test-digitize
