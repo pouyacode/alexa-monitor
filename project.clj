@@ -7,7 +7,8 @@
                  [hato "0.8.1"]
                  [hickory "0.7.1"]
                  [org.clojure/java.jdbc "0.7.12"]
-                 [org.xerial/sqlite-jdbc "3.34.0"]]
+                 [org.xerial/sqlite-jdbc "3.34.0"]
+                 [overtone/at-at "1.2.0"]]
   :main ^:skip-aot alexa-monitor.core
   :target-path "target/%s"
   :profiles {:dev {:plugins [[lein-shell "0.5.0"]]}

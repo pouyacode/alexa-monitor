@@ -2866,12 +2866,13 @@ net.brehaut.ClojureTools = (function (SH) {
   };
 })(SyntaxHighlighter);
 </script><title>alexa-monitor -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name"><a href="https://alexa-monitor.pouyacode.net">alexa-monitor</a></h1><h2 class="project-version">0.1.0-SNAPSHOT</h2><br /><p>Simple web crawler to guide new programmers in Clojure world.</p>
-</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.11.0-alpha1</td></tr><tr><td class="dep-name">hato</td><td class="dotted"><hr /></td><td class="dep-version">0.8.1</td></tr><tr><td class="dep-name">hickory</td><td class="dotted"><hr /></td><td class="dep-version">0.7.1</td></tr><tr><td class="dep-name">org.clojure/java.jdbc</td><td class="dotted"><hr /></td><td class="dep-version">0.7.12</td></tr><tr><td class="dep-name">org.xerial/sqlite-jdbc</td><td class="dotted"><hr /></td><td class="dep-version">3.34.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#alexa-monitor.core">alexa-monitor.core</a></li><li><a href="#alexa-monitor.collector">alexa-monitor.collector</a></li><li><a href="#alexa-monitor.database">alexa-monitor.database</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.core" name="alexa-monitor.core"><h1 class="project-name">alexa-monitor.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Obviously, the entry point of our application.
+</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.11.0-alpha1</td></tr><tr><td class="dep-name">hato</td><td class="dotted"><hr /></td><td class="dep-version">0.8.1</td></tr><tr><td class="dep-name">hickory</td><td class="dotted"><hr /></td><td class="dep-version">0.7.1</td></tr><tr><td class="dep-name">org.clojure/java.jdbc</td><td class="dotted"><hr /></td><td class="dep-version">0.7.12</td></tr><tr><td class="dep-name">org.xerial/sqlite-jdbc</td><td class="dotted"><hr /></td><td class="dep-version">3.34.0</td></tr><tr><td class="dep-name">overtone/at-at</td><td class="dotted"><hr /></td><td class="dep-version">1.2.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#alexa-monitor.core">alexa-monitor.core</a></li><li><a href="#alexa-monitor.collector">alexa-monitor.collector</a></li><li><a href="#alexa-monitor.database">alexa-monitor.database</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.core" name="alexa-monitor.core"><h1 class="project-name">alexa-monitor.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Obviously, the entry point of our application.
 Here we import <code>collector</code> and <code>database</code> namespace and call some functions
 within them.</p>
 </td><td class="codes"><pre class="brush: clojure">(ns alexa-monitor.core
   (:require [alexa-monitor.collector :as collector]
-            [alexa-monitor.database :as database])
+            [alexa-monitor.database :as database]
+            [overtone.at-at :as at])
   (:gen-class))</pre></td></tr><tr><td class="docs"><p>Crawl the page and grab some useful data via <code>alexa-monitor.collector</code> and
   put those data in database, using <code>alexa-monitor.database</code>.</p>
 
@@ -2882,14 +2883,18 @@ to add more information to that hash-map.</p>
 
 <p>Then we <code>(dissoc :domain)</code> from it to make it ready for our <code>rank</code> table.
 and send the result to <code>database/new-entry</code> to be inserted into database.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn -main
+</td><td class="codes"><pre class="brush: clojure">(defn update-rank
   [&amp; args]
   (let [domains (database/domain-list)]
     (doall (map #(-&gt; %
                      collector/main
                      (dissoc :domain)
                      database/new-entry)
-                domains))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.collector" name="alexa-monitor.collector"><h1 class="project-name">alexa-monitor.collector</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Here we handle everything relative to crawling the webpage and extracting
+                domains))))</pre></td></tr><tr><td class="docs"><p>Create a simple schedule and call <code>update-rank</code> every 5 minutes.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn -main
+  [&amp; args]
+  (let [thread-pool (at/mk-pool)]
+    (at/every 10000 update-rank thread-pool :desc &quot;updating ranks&quot;)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.collector" name="alexa-monitor.collector"><h1 class="project-name">alexa-monitor.collector</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Here we handle everything relative to crawling the webpage and extracting
 the parts we need. Let's choose cool function names; If it's about getting
 some html page, why not call it <code>web-grab</code>?!</p>
 
@@ -2931,7 +2936,7 @@ If you want to create actual requests to alexa.</p>
 <p>TODO: Error handling.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn web-grab
   [url]
-  (println &quot;Getting updates for:&quot; url)
+  (println &quot;Getting updates for: &quot; url)
   (try (:body
         #_(web/get (str &quot;http://localhost:8000/&quot; url &quot;/&quot;))
         (web/get (str &quot;https://www.alexa.com/minisiteinfo/&quot; url)))
@@ -3015,14 +3020,14 @@ database automatically if the software couldn't find database.</p>
                            [:timestamp :datetime :default :current_timestamp]
                            [:foreign :key &quot;(domain_id)&quot; :references :domains &quot;(domain_id)&quot;]]))
        (catch Exception e
-         (println (.getMessage e))))
+         (.println *err* (.getMessage e))))
   (try (db-do-commands
         db
         (create-table-ddl :domains
                           [[:domain_id :integer :primary :key :asc]
                            [:domain :text]]))
        (catch Exception e
-         (.getMessage e))))</pre></td></tr><tr><td class="docs"><p>Get list of tracked websites from <code>domains</code> table.
+         (.println *err* (.getMessage e)))))</pre></td></tr><tr><td class="docs"><p>Get list of tracked websites from <code>domains</code> table.
   The result would be like:
   <code>({:domain_id 1, :domain "domain.com"} {:domain_id 2 :domain "domain.net")</code></p>
 </td><td class="codes"><pre class="brush: clojure">(defn domain-list
@@ -3046,7 +3051,7 @@ database automatically if the software couldn't find database.</p>
           (insert! db &quot;rank&quot; domain-map)
           (println &quot;New rank:&quot; domain-map))
         (println &quot;No change:&quot; domain-map)))
-    (println &quot;Connection error:&quot; domain-map)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_alexa-monitor.core">alexa-monitor.core</li><li class="floating-toc-li" id="floating-toc_alexa-monitor.collector">alexa-monitor.collector</li><li class="floating-toc-li" id="floating-toc_alexa-monitor.database">alexa-monitor.database</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+    (.println *err* &quot;Connection error:&quot; domain-map)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_alexa-monitor.core">alexa-monitor.core</li><li class="floating-toc-li" id="floating-toc_alexa-monitor.collector">alexa-monitor.collector</li><li class="floating-toc-li" id="floating-toc_alexa-monitor.database">alexa-monitor.database</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
 SyntaxHighlighter.all();
 
 // hackity hack

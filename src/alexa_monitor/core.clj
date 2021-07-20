@@ -3,7 +3,8 @@
 ;;; within them.
 (ns alexa-monitor.core
   (:require [alexa-monitor.collector :as collector]
-            [alexa-monitor.database :as database])
+            [alexa-monitor.database :as database]
+            [overtone.at-at :as at])
   (:gen-class))
 
 
@@ -14,7 +15,7 @@
 ;;;
 ;;; Then we `(dissoc :domain)` from it to make it ready for our `rank` table.
 ;;; and send the result to `database/new-entry` to be inserted into database.
-(defn -main
+(defn update-rank
   "Crawl the page and grab some useful data via `alexa-monitor.collector` and
   put those data in database, using `alexa-monitor.database`."
   [& args]
@@ -24,3 +25,10 @@
                      (dissoc :domain)
                      database/new-entry)
                 domains))))
+
+
+(defn -main
+  "Create a simple schedule and call `update-rank` every 5 minutes."
+  [& args]
+  (let [thread-pool (at/mk-pool)]
+    (at/every 10000 update-rank thread-pool :desc "updating ranks")))
