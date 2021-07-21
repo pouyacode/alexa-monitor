@@ -7,6 +7,9 @@
             [overtone.at-at :as at])
   (:gen-class))
 
+;;; Create thread pool for at-at scheduling.
+(def thread-pool (at/mk-pool))
+
 
 ;;; This function calls `database/domain-list` and gets a list of current domains
 ;;; to watch. Each domain is inside a hash-map. Something like
@@ -30,5 +33,7 @@
 (defn -main
   "Create a simple schedule and call `update-rank` every 5 minutes."
   [& args]
-  (let [thread-pool (at/mk-pool)]
-    (at/every 10000 update-rank thread-pool :desc "updating ranks")))
+  (at/every 300000 update-rank thread-pool :desc "updating ranks"))
+
+
+#_(at/stop-and-reset-pool! thread-pool) ; For REPL development

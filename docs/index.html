@@ -2873,7 +2873,8 @@ within them.</p>
   (:require [alexa-monitor.collector :as collector]
             [alexa-monitor.database :as database]
             [overtone.at-at :as at])
-  (:gen-class))</pre></td></tr><tr><td class="docs"><p>Crawl the page and grab some useful data via <code>alexa-monitor.collector</code> and
+  (:gen-class))</pre></td></tr><tr><td class="docs"><p>Create thread pool for at-at scheduling.</p>
+</td><td class="codes"><pre class="brush: clojure">(def thread-pool (at/mk-pool))</pre></td></tr><tr><td class="docs"><p>Crawl the page and grab some useful data via <code>alexa-monitor.collector</code> and
   put those data in database, using <code>alexa-monitor.database</code>.</p>
 
 <p>This function calls <code>database/domain-list</code> and gets a list of current domains
@@ -2893,8 +2894,7 @@ and send the result to <code>database/new-entry</code> to be inserted into datab
                 domains))))</pre></td></tr><tr><td class="docs"><p>Create a simple schedule and call <code>update-rank</code> every 5 minutes.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn -main
   [&amp; args]
-  (let [thread-pool (at/mk-pool)]
-    (at/every 10000 update-rank thread-pool :desc &quot;updating ranks&quot;)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.collector" name="alexa-monitor.collector"><h1 class="project-name">alexa-monitor.collector</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Here we handle everything relative to crawling the webpage and extracting
+  (at/every 300000 update-rank thread-pool :desc &quot;updating ranks&quot;))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.collector" name="alexa-monitor.collector"><h1 class="project-name">alexa-monitor.collector</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Here we handle everything relative to crawling the webpage and extracting
 the parts we need. Let's choose cool function names; If it's about getting
 some html page, why not call it <code>web-grab</code>?!</p>
 
