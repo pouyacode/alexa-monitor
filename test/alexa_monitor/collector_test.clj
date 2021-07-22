@@ -1,6 +1,9 @@
 (ns alexa-monitor.collector-test
   (:require [clojure.test :refer :all]
-            [alexa-monitor.collector :refer :all]))
+            [alexa-monitor.collector :refer :all]
+            [clojure.test.check :as tc]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]))
 
 
 (def html
@@ -65,3 +68,17 @@
 #_(test-huccupize)
 #_(test-parse)
 #_(test-digitize)
+
+
+(gen/choose 10 20)
+
+(def some-string (prop/for-all [my-strings (gen/vector gen/string)]
+                               (map digitize my-strings)))
+
+(tc/quick-check 100 some-string)
+
+
+(def some-uuid (prop/for-all [my-strings (gen/vector gen/uuid)]
+                               (map digitize my-strings)))
+
+(tc/quick-check 100 some-uuid)

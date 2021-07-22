@@ -8,11 +8,13 @@
                  [hickory "0.7.1"]
                  [org.clojure/java.jdbc "0.7.12"]
                  [org.xerial/sqlite-jdbc "3.34.0"]
-                 [overtone/at-at "1.2.0"]]
+                 [overtone/at-at "1.2.0"]
+                 [org.clojure/test.check "1.1.0"]]
   :main ^:skip-aot alexa-monitor.core
   :target-path "target/%s"
   :profiles {:dev {:plugins [[lein-shell "0.5.0"]]}
-             :uberjar {:aot :all}}
+             :uberjar {:aot :all}
+             :ring {:handler example/app}}
   :aliases
   {"native"
    ["shell"
