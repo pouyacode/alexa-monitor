@@ -23,7 +23,7 @@
   (try
     (or
      (->> string
-          (re-seq #"[\d.]+")
+          (re-seq #"[\d]+")
           clojure.string/join
           clojure.edn/read-string)
      0)
