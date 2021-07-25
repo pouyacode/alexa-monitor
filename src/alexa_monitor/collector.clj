@@ -60,11 +60,14 @@
       hick/as-hickory))
 
 
+;;; Proces the hiccup and read `Alexa Rank`
+;;; Using multimethods to create simple layer of abstraction
+(defmulti scrape :what)
+
 ;;; Extract the rank of our domain from the webpage and `gigitize` it.
-;;; Then add it to `domain-map` hash-map and return the result.
-(defn rank
-  "Proces the hiccup and read `Alexa Rank`"
-  [domain-map hiccup]
+;;; Then return the result to be added to `domain-map`
+(defmethod scrape :rank
+  [params hiccup]
   (-> (s/select (s/child (s/class "nopaddingbottom")
                          (s/tag :div)
                          (s/tag :a))
@@ -72,14 +75,12 @@
       first
       :content
       second
-      digitize
-      (#(conj domain-map [:rank %]))))
+      digitize))
 
 
 ;;; Extract the backlink count, then `digitize` it.
-;;; Then add it to `domain-map` hash-map and return the result.
-(defn backlink
-  "Process the hiccup and read `Sites Linking In`."
+;;; Then return the result to be added to `domain-map`
+(defmethod scrape :backlink
   [domain-map hiccup]
   (-> (s/select (s/child (s/class "nopaddingbottom")
                          (s/tag :div)
@@ -89,13 +90,12 @@
       first
       :content
       first
-      digitize
-      (#(conj domain-map [:backlink %]))))
-
+      digitize))
 
 ;;; Creates a nice data-flow through every function of this namespace.
 ;;; First request the url and create a hicuup its HTML elements, Then extract
 ;;; `rank` and `backlink` from it.
+;;; And add everything to provided `domain-map`.
 (defn main
   "Entry point."
   [domain-map]
@@ -104,5 +104,5 @@
                    web-grab
                    hiccupize)]
     (-> domain-map
-        (rank hiccup)
-        (backlink hiccup))))
+        (conj {:rank (scrape {:what :rank} hiccup)})
+        (conj {:backlink (scrape {:what :backlink} hiccup)}))))

@@ -2866,7 +2866,7 @@ net.brehaut.ClojureTools = (function (SH) {
   };
 })(SyntaxHighlighter);
 </script><title>alexa-monitor -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name"><a href="https://alexa-monitor.pouyacode.net">alexa-monitor</a></h1><h2 class="project-version">0.1.0-SNAPSHOT</h2><br /><p>Simple web crawler to guide new programmers in Clojure world.</p>
-</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.11.0-alpha1</td></tr><tr><td class="dep-name">hato</td><td class="dotted"><hr /></td><td class="dep-version">0.8.1</td></tr><tr><td class="dep-name">hickory</td><td class="dotted"><hr /></td><td class="dep-version">0.7.1</td></tr><tr><td class="dep-name">org.clojure/java.jdbc</td><td class="dotted"><hr /></td><td class="dep-version">0.7.12</td></tr><tr><td class="dep-name">org.xerial/sqlite-jdbc</td><td class="dotted"><hr /></td><td class="dep-version">3.34.0</td></tr><tr><td class="dep-name">overtone/at-at</td><td class="dotted"><hr /></td><td class="dep-version">1.2.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#alexa-monitor.core">alexa-monitor.core</a></li><li><a href="#alexa-monitor.collector">alexa-monitor.collector</a></li><li><a href="#alexa-monitor.database">alexa-monitor.database</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.core" name="alexa-monitor.core"><h1 class="project-name">alexa-monitor.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Obviously, the entry point of our application.
+</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.11.0-alpha1</td></tr><tr><td class="dep-name">hato</td><td class="dotted"><hr /></td><td class="dep-version">0.8.1</td></tr><tr><td class="dep-name">hickory</td><td class="dotted"><hr /></td><td class="dep-version">0.7.1</td></tr><tr><td class="dep-name">org.clojure/java.jdbc</td><td class="dotted"><hr /></td><td class="dep-version">0.7.12</td></tr><tr><td class="dep-name">org.xerial/sqlite-jdbc</td><td class="dotted"><hr /></td><td class="dep-version">3.34.0</td></tr><tr><td class="dep-name">overtone/at-at</td><td class="dotted"><hr /></td><td class="dep-version">1.2.0</td></tr><tr><td class="dep-name">org.clojure/test.check</td><td class="dotted"><hr /></td><td class="dep-version">1.1.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#alexa-monitor.core">alexa-monitor.core</a></li><li><a href="#alexa-monitor.collector">alexa-monitor.collector</a></li><li><a href="#alexa-monitor.database">alexa-monitor.database</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.core" name="alexa-monitor.core"><h1 class="project-name">alexa-monitor.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Obviously, the entry point of our application.
 Here we import <code>collector</code> and <code>database</code> namespace and call some functions
 within them.</p>
 </td><td class="codes"><pre class="brush: clojure">(ns alexa-monitor.core
@@ -2917,7 +2917,7 @@ Because java's <code>Long</code> can be <code>nil</code> sometimes!</p>
   (try
     (or
      (-&gt;&gt; string
-          (re-seq #&quot;[\d.]+&quot;)
+          (re-seq #&quot;[1-9][0-9]?&quot;)
           clojure.string/join
           clojure.edn/read-string)
      0)
@@ -2947,12 +2947,12 @@ If you want to create actual requests to alexa.</p>
   [html]
   (-&gt; html
       hick/parse
-      hick/as-hickory))</pre></td></tr><tr><td class="docs"><p>Proces the hiccup and read <code>Alexa Rank</code></p>
-
-<p>Extract the rank of our domain from the webpage and <code>gigitize</code> it.
-Then add it to <code>domain-map</code> hash-map and return the result.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn rank
-  [domain-map hiccup]
+      hick/as-hickory))</pre></td></tr><tr><td class="docs"><p>Proces the hiccup and read <code>Alexa Rank</code>
+Using multimethods to create simple layer of abstraction</p>
+</td><td class="codes"><pre class="brush: clojure">(defmulti scrape :what)</pre></td></tr><tr><td class="docs"><p>Extract the rank of our domain from the webpage and <code>gigitize</code> it.
+Then return the result to be added to <code>domain-map</code></p>
+</td><td class="codes"><pre class="brush: clojure">(defmethod scrape :rank
+  [params hiccup]
   (-&gt; (s/select (s/child (s/class &quot;nopaddingbottom&quot;)
                          (s/tag :div)
                          (s/tag :a))
@@ -2960,12 +2960,9 @@ Then add it to <code>domain-map</code> hash-map and return the result.</p>
       first
       :content
       second
-      digitize
-      (#(conj domain-map [:rank %]))))</pre></td></tr><tr><td class="docs"><p>Process the hiccup and read <code>Sites Linking In</code>.</p>
-
-<p>Extract the backlink count, then <code>digitize</code> it.
-Then add it to <code>domain-map</code> hash-map and return the result.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn backlink
+      digitize))</pre></td></tr><tr><td class="docs"><p>Extract the backlink count, then <code>digitize</code> it.
+Then return the result to be added to <code>domain-map</code></p>
+</td><td class="codes"><pre class="brush: clojure">(defmethod scrape :backlink
   [domain-map hiccup]
   (-&gt; (s/select (s/child (s/class &quot;nopaddingbottom&quot;)
                          (s/tag :div)
@@ -2975,12 +2972,12 @@ Then add it to <code>domain-map</code> hash-map and return the result.</p>
       first
       :content
       first
-      digitize
-      (#(conj domain-map [:backlink %]))))</pre></td></tr><tr><td class="docs"><p>Entry point.</p>
+      digitize))</pre></td></tr><tr><td class="docs"><p>Entry point.</p>
 
 <p>Creates a nice data-flow through every function of this namespace.
 First request the url and create a hicuup its HTML elements, Then extract
-<code>rank</code> and <code>backlink</code> from it.</p>
+<code>rank</code> and <code>backlink</code> from it.
+And add everything to provided <code>domain-map</code>.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn main
   [domain-map]
   (let [hiccup (-&gt; :domain
@@ -2988,8 +2985,8 @@ First request the url and create a hicuup its HTML elements, Then extract
                    web-grab
                    hiccupize)]
     (-&gt; domain-map
-        (rank hiccup)
-        (backlink hiccup))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.database" name="alexa-monitor.database"><h1 class="project-name">alexa-monitor.database</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Small namespace with few useful functions to work with database.</p>
+        (conj {:rank (scrape {:what :rank} hiccup)})
+        (conj {:backlink (scrape {:what :backlink} hiccup)}))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#alexa-monitor.database" name="alexa-monitor.database"><h1 class="project-name">alexa-monitor.database</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>Small namespace with few useful functions to work with database.</p>
 </td><td class="codes"><pre class="brush: clojure">(ns alexa-monitor.database
   (:require [clojure.java.jdbc :refer :all])
   (:gen-class))</pre></td></tr><tr><td class="docs"><p>We currently use sqlite. Since it's a small project, even a CSV file could
