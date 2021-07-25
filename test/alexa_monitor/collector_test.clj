@@ -70,15 +70,7 @@
 #_(test-digitize)
 
 
-(gen/choose 10 20)
+(def some-string (prop/for-all [strings gen/string]
+                               (int? (digitize strings))))
 
-(def some-string (prop/for-all [my-strings (gen/vector gen/string)]
-                               (map digitize my-strings)))
-
-(tc/quick-check 100 some-string)
-
-
-(def some-uuid (prop/for-all [my-strings (gen/vector gen/uuid)]
-                               (map digitize my-strings)))
-
-(tc/quick-check 100 some-uuid)
+(tc/quick-check 1000 some-string)
