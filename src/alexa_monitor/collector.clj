@@ -20,14 +20,11 @@
 (defn digitize
   "Trim string and return its digit part."
   [string]
-  (try
-    (or
-     (->> string
-          (re-seq #"[1-9][0-9]?")
-          clojure.string/join
-          clojure.edn/read-string)
-     0)
-    (catch Exception e nil)))
+  (->> string
+       (re-seq #"[\d]+")                ; Get all digits in the string,
+       (#(if (nil? %)                   ; Empty string returns `nil`.
+           0                            ; If it was an empty string, return `0`.
+           (bigint (clojure.string/join %))))))
 
 
 ;;; Creates a simple HTTP GET request, ignores the status and only returns the

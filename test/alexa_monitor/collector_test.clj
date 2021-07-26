@@ -57,9 +57,14 @@
 (deftest test-digitize
   (testing "123"
     (is (= 123 (digitize "123"))))
-  (testing "123,456"
-    (is (= 123456 (digitize "123,456"))))
+  (testing "not octal"
+    (is (= 8 (digitize "08"))))
+  (testing "123,456,789"
+    (is (= 123456789 (digitize "123,456,789"))))
+  (testing "zero after colon"
+    (is (= 123056009 (digitize "123,056,009"))))
   (testing "Empty"
+    (is (= 0 (digitize "")))
     (is (= 0 (digitize "Anything"))))
   (testing "Not trimmed"
     (is (= 42 (digitize "\n\t 42 \r\n\b")))))
