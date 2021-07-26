@@ -45,13 +45,13 @@
 
 (deftest test-parse
   (testing "Rank test."
-    (is (= {:rank 9397083} (-> html
-                               hiccupize
-                               (#(rank {} %))))))
+    (is (= 9397083 (-> html
+                       hiccupize
+                       (#(scrape {:what :rank} %))))))
   (testing "Backlink test."
-    (is (= {:backlink 1} (-> html
-                             hiccupize
-                             (#(backlink {} %)))))))
+    (is (= 1 (-> html
+                 hiccupize
+                 (#(scrape {:what :backlink} %)))))))
 
 
 (deftest test-digitize
@@ -65,7 +65,7 @@
     (is (= 42 (digitize "\n\t 42 \r\n\b")))))
 
 
-#_(test-huccupize)
+#_(test-hiccupize)
 #_(test-parse)
 #_(test-digitize)
 
