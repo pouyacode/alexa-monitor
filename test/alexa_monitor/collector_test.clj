@@ -70,12 +70,19 @@
     (is (= 42 (digitize "\n\t 42 \r\n\b")))))
 
 
+(def some-string (prop/for-all [strings gen/string]
+                               (integer? (digitize strings))))
+
+
+(deftest test-testcheck
+  (testing "digitize 100,000 random strings"
+    (let [test-result (tc/quick-check 100000 some-string)
+          result (:result test-result)
+          pass (:pass? test-result)]
+      (is (= true (and result pass))))))
+
+
 #_(test-hiccupize)
 #_(test-parse)
 #_(test-digitize)
-
-
-(def some-string (prop/for-all [strings gen/string]
-                               (int? (digitize strings))))
-
-(tc/quick-check 1000 some-string)
+#_(test-testcheck)
