@@ -2909,9 +2909,10 @@ messy.</p>
             [hickory.select :as s])
   (:gen-class))</pre></td></tr><tr><td class="docs"><p>Trim string and return its digit part.</p>
 
-<p>It returns <code>java.lang.Long</code>.
-I used an <code>or</code> to return <code>0</code> if there wasn't any digit in the string.
-Because java's <code>Long</code> can be <code>nil</code> sometimes!</p>
+<p>If it finds any digit in the provided string,
+It returns <code>clojure.lang.BigInt</code>.
+If it's an empty string, we return <code>0</code> manually, because <code>bigint</code> function
+returns an exception if we call it with empty string (i.e. <code>(bigint "")</code>)</p>
 </td><td class="codes"><pre class="brush: clojure">(defn digitize
   [string]
   (-&gt;&gt; string
@@ -2974,7 +2975,8 @@ Then return the result to be added to <code>domain-map</code></p>
 <p>Creates a nice data-flow through every function of this namespace.
 First request the url and create a hicuup its HTML elements, Then extract
 <code>rank</code> and <code>backlink</code> from it.
-And add everything to provided <code>domain-map</code>.</p>
+And add everything to provided <code>domain-map</code>.
+We don't need to convert <code>bigint</code> from <code>digitize</code> to <code>int</code>.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn main
   [domain-map]
   (let [hiccup (-&gt; :domain

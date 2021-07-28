@@ -14,9 +14,10 @@
   (:gen-class))
 
 
-;;; It returns `java.lang.Long`.
-;;; I used an `or` to return `0` if there wasn't any digit in the string.
-;;; Because java's `Long` can be `nil` sometimes!
+;;; If it finds any digit in the provided string,
+;;; It returns `clojure.lang.BigInt`.
+;;; If it's an empty string, we return `0` manually, because `bigint` function
+;;; returns an exception if we call it with empty string (i.e. `(bigint "")`)
 (defn digitize
   "Trim string and return its digit part."
   [string]
@@ -93,6 +94,7 @@
 ;;; First request the url and create a hicuup its HTML elements, Then extract
 ;;; `rank` and `backlink` from it.
 ;;; And add everything to provided `domain-map`.
+;;; We don't need to convert `bigint` from `digitize` to `int`.
 (defn main
   "Entry point."
   [domain-map]
