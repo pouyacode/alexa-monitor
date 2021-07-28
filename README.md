@@ -35,7 +35,7 @@ Create GraalVM native-image:
 lein native-image
 ```
 
-Generate docs (follow instructions from [Marginalia](https://github.com/gdeer81/lein-marginalia)):
+Generate docs using [Marginalia](https://github.com/gdeer81/marginalia):
 ```
 lein marg -f index.html
 ```

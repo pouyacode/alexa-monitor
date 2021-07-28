@@ -15,6 +15,7 @@
   :profiles {:dev {:plugins [[lein-shell "0.5.0"]]}
              :uberjar {:aot :all}
              :ring {:handler example/app}}
+  :plugins [[lein-marginalia "0.9.1"]]
   :aliases
   {"native"
    ["shell"
