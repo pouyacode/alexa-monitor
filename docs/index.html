@@ -2914,14 +2914,11 @@ I used an <code>or</code> to return <code>0</code> if there wasn't any digit in 
 Because java's <code>Long</code> can be <code>nil</code> sometimes!</p>
 </td><td class="codes"><pre class="brush: clojure">(defn digitize
   [string]
-  (try
-    (or
-     (-&gt;&gt; string
-          (re-seq #&quot;[1-9][0-9]?&quot;)
-          clojure.string/join
-          clojure.edn/read-string)
-     0)
-    (catch Exception e nil)))</pre></td></tr><tr><td class="docs"><p>Retrieve the page and returns html output.</p>
+  (-&gt;&gt; string
+       (re-seq #&quot;[\d]+&quot;)                ; Get all digits in the string,
+       (#(if (nil? %)                   ; Empty string returns `nil`.
+           0                            ; If it was an empty string, return `0`.
+           (bigint (clojure.string/join %))))))</pre></td></tr><tr><td class="docs"><p>Retrieve the page and returns html output.</p>
 
 <p>Creates a simple HTTP GET request, ignores the status and only returns the
 HTML part.</p>
